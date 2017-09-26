@@ -649,6 +649,12 @@
                                     "Fn::Join": [
                                         "",
                                         [
+                                            "aws s3 ls ",
+                                            { "Ref": "QSS3BucketName" },
+                                            "; ",
+                                            "aws s3 ls –recursive ",
+                                            { "Ref": "QSS3BucketName" },
+                                            "; ",
                                             "./tmp/bastion_bootstrap.sh",
                                             " --banner ",
                                             {
