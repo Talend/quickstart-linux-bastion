@@ -199,6 +199,10 @@
             "Description": "Allowed CIDR block for external SSH access to the bastions",
             "Type": "String"
         },
+		"BastionSecurityGroup": {
+            "Description": "Bastion Server Security Group.",
+            "Type": "String"
+		},
         "VPCID": {
             "Description": "ID of the VPC (e.g., vpc-0343606e)",
             "Type": "AWS::EC2::VPC::Id"
@@ -781,33 +785,6 @@
                     }
                 }
             }
-        },
-        "BastionSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "Enables SSH Access to Bastion Hosts",
-                "VpcId": {
-                    "Ref": "VPCID"
-                },
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": {
-                            "Ref": "RemoteAccessCIDR"
-                        }
-                    },
-                    {
-                        "IpProtocol": "icmp",
-                        "FromPort": "-1",
-                        "ToPort": "-1",
-                        "CidrIp": {
-                            "Ref": "RemoteAccessCIDR"
-                        }
-                    }
-                ]
-            }
         }
     },
     "Outputs": {
@@ -849,12 +826,6 @@
                 "Ref": "BastionMainLogGroup"
             },
             "Description": "CloudWatch Logs GroupName. Your SSH logs will be stored here."
-        },
-        "BastionSecurityGroupID": {
-            "Value": {
-                "Ref": "BastionSecurityGroup"
-            },
-            "Description": "Bastion Security Group ID"
         }
     }
 }

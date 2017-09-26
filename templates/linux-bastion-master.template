@@ -302,6 +302,30 @@
                 }
             }
         },
+        "BastionSecurityGroup": {
+            "DependsOn": "VPCStack",
+            "Type": "AWS::CloudFormation::Stack",
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Sub": [
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}templates/linux-bastion-securitygroups.template",
+                        {
+                            "QSS3Region": {
+                                "Fn::If": [
+                                    "GovCloudCondition",
+                                    "s3-us-gov-west-1",
+                                    "s3"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Parameters": {
+                    "VPCID": { "Ref": "VPCStack" },
+                    "RemoteAccessCIDR": { "Ref": "RemoteAccessCIDR" }
+                }
+            }
+        },
         "BastionStack": {
             "DependsOn": "VPCStack",
             "Type": "AWS::CloudFormation::Stack",
@@ -321,29 +345,15 @@
                     ]
                 },
                 "Parameters": {
-                    "BastionAMIOS": {
-                        "Ref": "BastionAMIOS"
-                    },
-                    "BastionBanner": {
-                        "Ref": "BastionBanner"
-                    },
-                    "BastionInstanceType": {
-                        "Ref": "BastionInstanceType"
-                    },
-                    "EnableBanner": {
-                        "Ref": "EnableBanner"
-                    },
-                    "EnableTCPForwarding": {
-                        "Ref": "EnableTCPForwarding"
-                    },
-                    "EnableX11Forwarding": {
-                        "Ref": "EnableX11Forwarding"
-                    },
-                    "KeyPairName": {
-                        "Ref": "KeyPairName"
-                    },
-                    "NumBastionHosts": {
-                        "Ref": "NumBastionHosts"
+                    "QSS3BucketName": { "Ref": "QSS3BucketName" },
+                    "QSS3KeyPrefix": { "Ref": "QSS3KeyPrefix" },
+                    "BastionSecurityGroup": { "Ref": "BastionSecurityGroup" },
+                    "RemoteAccessCIDR": { "Ref": "RemoteAccessCIDR" },
+                    "VPCID": {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.VPCID"
+                        ]
                     },
                     "PublicSubnet1ID": {
                         "Fn::GetAtt": [
@@ -357,21 +367,14 @@
                             "Outputs.PublicSubnet2ID"
                         ]
                     },
-                    "QSS3BucketName": {
-                        "Ref": "QSS3BucketName"
-                    },
-                    "QSS3KeyPrefix": {
-                         "Ref": "QSS3KeyPrefix"
-                    },
-                    "RemoteAccessCIDR": {
-                        "Ref": "RemoteAccessCIDR"
-                    },
-                    "VPCID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.VPCID"
-                        ]
-                    }
+                    "KeyPairName": { "Ref": "KeyPairName" },
+                    "NumBastionHosts": { "Ref": "NumBastionHosts" },
+                    "BastionAMIOS": { "Ref": "BastionAMIOS" },
+                    "BastionBanner": { "Ref": "BastionBanner" },
+                    "BastionInstanceType": { "Ref": "BastionInstanceType" },
+                    "EnableBanner": { "Ref": "EnableBanner" },
+                    "EnableTCPForwarding": { "Ref": "EnableTCPForwarding" },
+                    "EnableX11Forwarding": { "Ref": "EnableX11Forwarding" }
                 }
             }
         }
