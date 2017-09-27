@@ -646,34 +646,7 @@
                         "commands": {
                             "b-bootstrap": {
                                 "command": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "aws s3 ls ",
-                                            { "Ref": "QSS3BucketName" },
-                                            "; ",
-                                            "aws s3 ls –recursive ",
-                                            { "Ref": "QSS3BucketName" },
-                                            "; ",
-                                            "./tmp/bastion_bootstrap.sh",
-                                            " --banner ",
-                                            {
-                                                "Ref": "BastionBanner"
-                                            },
-                                            " --enable ",
-                                            {
-                                                "Ref": "EnableBanner"
-                                            },
-                                            " --tcp-forwarding ",
-                                            {
-                                                "Ref": "EnableTCPForwarding"
-                                            },
-                                            " --x11-forwarding ",
-                                            {
-                                                "Ref": "EnableX11Forwarding"
-                                            }
-                                        ]
-                                    ]
+                                    "Fn::Sub": "./tmp/bastion_bootstrap.sh --banner ${BastionBanner} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
                                 }
                             }
                         }
