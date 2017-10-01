@@ -564,6 +564,7 @@
         },
         "BastionAutoScalingGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "DependsOn": [ "BastionMainLogGroup", "SSHMetricFilter", "EIP1"  ],
             "Properties": {
                 "LaunchConfigurationName": {
                     "Ref": "BastionLaunchConfiguration"
