@@ -22,9 +22,7 @@
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "GroupDescription": "Enables SSH Access to Bastion Hosts",
-                "VpcId": {
-                    "Ref": "VPCID"
-                },
+                "VpcId": { "Ref": "VPCID" },
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
