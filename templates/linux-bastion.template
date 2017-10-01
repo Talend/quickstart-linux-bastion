@@ -594,14 +594,6 @@
                         "PropagateAtLaunch": "true"
                     }
                 ]
-            },
-            "CreationPolicy": {
-                "ResourceSignal": {
-                    "Count": {
-                        "Ref": "NumBastionHosts"
-                    },
-                    "Timeout": "PT30M"
-                }
             }
         },
         "BastionLaunchConfiguration": {
@@ -688,9 +680,7 @@
                                             "export CLOUDWATCHGROUP=",
                                             {
                                                 "Ref": "BastionMainLogGroup"
-                                            },
-                                            ";",
-                                            { "Fn::Sub": "./tmp/bastion_bootstrap.sh --banner ${BastionBanner} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}" }
+                                            }
                                         ]
                                     ]
                                 }
