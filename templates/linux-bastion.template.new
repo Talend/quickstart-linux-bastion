@@ -598,6 +598,7 @@
         },
         "BastionLaunchConfiguration": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "DependsOn": [ "BastionMainLogGroup", "SSHMetricFilter", "EIP1"  ],
             "Metadata": {
                 "AWS::CloudFormation::Authentication": {
                     "S3AccessCreds": {
@@ -639,7 +640,50 @@
                         "commands": {
                             "b-bootstrap": {
                                 "command": {
-                                    "Fn::Sub": "./tmp/bastion_bootstrap.sh --banner ${BastionBanner} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "export EIP_LIST=\"",
+                                            {
+                                                "Ref": "EIP1"
+                                            },
+                                            ",",
+                                            {
+                                                "Fn::If": [
+                                                    "2BastionCondition",
+                                                    {
+                                                        "Ref": "EIP2"
+                                                    },
+                                                    "Null"
+                                                ]
+                                            },
+                                            ",",
+                                            {
+                                                "Fn::If": [
+                                                    "3BastionCondition",
+                                                    {
+                                                        "Ref": "EIP3"
+                                                    },
+                                                    "Null"
+                                                ]
+                                            },
+                                            ",",
+                                            {
+                                                "Fn::If": [
+                                                    "4BastionCondition",
+                                                    {
+                                                        "Ref": "EIP4"
+                                                    },
+                                                    "Null"
+                                                ]
+                                            },
+                                            "\";",
+                                            "export CLOUDWATCHGROUP=",
+                                            {
+                                                "Ref": "BastionMainLogGroup"
+                                            }
+                                        ]
+                                    ]
                                 }
                             }
                         }
@@ -683,71 +727,28 @@
                         "Fn::Join": [
                             "",
                             [
-                                "#!/bin/bash\n",
-                                "export PATH=$PATH:/usr/local/bin\n",
-                                "which pip &> /dev/null\n",
-                                "if [ $? -ne 0 ] ; then\n",
-                                "    echo \"PIP NOT INSTALLED\"\n",
-                                "    [ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip) && echo \"PIP INSTALLED\"\n",
-                                "    [ `which apt-get` ] && apt-get -y update && apt-get -y install python-pip && echo \"PIP INSTALLED\"\n",
-                                "fi\n",
-                                "pip install --upgrade pip &> /dev/null\n",
-                                "pip install awscli --ignore-installed six &> /dev/null\n",
-                                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
-                                "EIP_LIST=\"",
-                                {
-                                    "Ref": "EIP1"
-                                },
-                                ",",
-                                {
-                                    "Fn::If": [
-                                        "2BastionCondition",
-                                        {
-                                            "Ref": "EIP2"
-                                        },
-                                        "Null"
-                                    ]
-                                },
-                                ",",
-                                {
-                                    "Fn::If": [
-                                        "3BastionCondition",
-                                        {
-                                            "Ref": "EIP3"
-                                        },
-                                        "Null"
-                                    ]
-                                },
-                                ",",
-                                {
-                                    "Fn::If": [
-                                        "4BastionCondition",
-                                        {
-                                            "Ref": "EIP4"
-                                        },
-                                        "Null"
-                                    ]
-                                },
-                                "\"\n",
-                                "CLOUDWATCHGROUP=",
-                                {
-                                    "Ref": "BastionMainLogGroup"
-                                },
-                                "\n",
-                                "cfn-init -v --stack ",
+                                "#!/bin/bash -xe\n",
+                                "# Install the files and packages from the metadata\n",
+                                "/opt/aws/bin/cfn-init -v ",
+                                "         --stack ",
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                " --resource BastionLaunchConfiguration --region ",
+                                "         --resource BastionLaunchConfiguration ",
+                                "         --configsets All ",
+                                "         --region ",
                                 {
                                     "Ref": "AWS::Region"
                                 },
                                 "\n",
-                                "cfn-signal -e $? --stack ",
+                                "# Signal the status from cfn-init\n",
+                                "/opt/aws/bin/cfn-signal -e $? ",
+                                "         --stack ",
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                " --resource BastionLaunchConfiguration --region ",
+                                "         --resource BastionLaunchConfiguration ",
+                                "         --region ",
                                 {
                                     "Ref": "AWS::Region"
                                 },
